@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from translate import Translator
 from fastapi.responses import HTMLResponse
 from fastapi.responses import RedirectResponse
+import phonenumbers
+from phonenumbers import carrier
+
 app = FastAPI(version='1.0.0', description='Just some of my API\'s...<br>By using this api you agree to follow the <a href="/tos/">TOS</a>' ,title='Vien\'s API collection\'s', docs_url=None, redoc_url='/docs', contact={'email': 'vien@courvix.com'}, terms_of_service='/tos/', license_info={'name': ' GPL-3.0 license', 'url': 'https://www.gnu.org/licenses/gpl-3.0.en.html'})
 
 @app.get('/',include_in_schema=False)
@@ -27,6 +30,23 @@ async def translate( text: str,  to_lang: str, from_lang: str):
     translation = translator.translate(text)
     return {"details": 'Success', "to_lang": to_lang, 'from_lang': from_lang, 'textOriginal': text, 'textTranslated': translation}
 
+@app.get('/api/validatenumber/', description='''
+Checks if the phone number is valid using Google's libphonenumber library.
+Will also provide information about the user. <a href="https://en.wikipedia.org/wiki/E.164" ><b>Use E.164 Format </b></a> (example +1 4151231234). MAKE SUE TO ENCODE THE USR AND REPLACE + WITH %2B
+
+''')
+async def phonevalidate(pnumber: str):
+    try:
+        number = phonenumbers.parse(pnumber, None)
+        carriers = carrier.name_for_number(number, "en")
+
+        valid = phonenumbers.is_valid_number(number)
+        if valid == True:
+            return {'countrycode': number.country_code, 'natitonal_number': number.national_number, 'valid': True, 'carrier': carriers}
+        else:
+            return {'valid': False, 'countrycode': None, 'national_number': None, 'carrier': None}
+    except phonenumbers.phonenumberutil.NumberParseException as r:
+        return {'details': f'Invalid number, {r}'}
 @app.get('/tos/', include_in_schema=False)
 async def tos():    
     html_content = '''
