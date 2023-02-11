@@ -2,8 +2,7 @@ from fastapi import FastAPI
 from translate import Translator
 from fastapi.responses import HTMLResponse
 from fastapi.responses import RedirectResponse
-
-app = FastAPI(version='1.0.0', description='Just some of my API\'s...<br>By using this api you agree to follow the <a href="/tos/">TOS</a>' ,title='Vien\'s API collection\'s', docs_url=None, redoc_url='/docs', contact={'email': 'vien@courvix.com'}, terms_of_service='/tos/')
+app = FastAPI(version='1.0.0', description='Just some of my API\'s...<br>By using this api you agree to follow the <a href="/tos/">TOS</a>' ,title='Vien\'s API collection\'s', docs_url=None, redoc_url='/docs', contact={'email': 'vien@courvix.com'}, terms_of_service='/tos/', license_info={'name': ' GPL-3.0 license', 'url': 'https://www.gnu.org/licenses/gpl-3.0.en.html'})
 
 @app.get('/',include_in_schema=False)
 async def home():
@@ -14,12 +13,22 @@ Translate a text using MyMemory.
 Use the country name or use ISO 639-1 for, \'from_lang\', \'to_lang\'
 ''')
 async def translate( text: str,  to_lang: str, from_lang: str):
+    """_summary_
+
+    Args:
+        text (str): the text thats gonna get transated
+        to_lang (str): The destined lang
+        from_lang (str): original language of the text
+
+    Returns:
+        _type_: json
+    """    
     translator= Translator(to_lang=to_lang, from_lang=from_lang, email='viendev.py@gmail.com')
     translation = translator.translate(text)
     return {"details": 'Success', "to_lang": to_lang, 'from_lang': from_lang, 'textOriginal': text, 'textTranslated': translation}
 
 @app.get('/tos/', include_in_schema=False)
-async def tos():
+async def tos():    
     html_content = '''
 <!DOCTYPE html>
 <html>
